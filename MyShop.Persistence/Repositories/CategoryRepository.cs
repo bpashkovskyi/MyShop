@@ -28,4 +28,26 @@ public class CategoryRepository : ICategoryRepository
     {
         return await this.context.Categories.FirstOrDefaultAsync(category => category.Name == name);
     }
+
+    public async Task<Category> AddCategory(Category category)
+    {
+        await this.context.Categories.AddAsync(category);
+        await this.context.SaveChangesAsync();
+
+        return category;
+    }
+
+    public async Task<Category> UpdateCategory(Category category)
+    {
+        this.context.Categories.Update(category);
+        await this.context.SaveChangesAsync();
+
+        return category;
+    }
+
+    public async Task DeleteCategory(Category category)
+    {
+        this.context.Remove(category);
+        await this.context.SaveChangesAsync();
+    }
 }

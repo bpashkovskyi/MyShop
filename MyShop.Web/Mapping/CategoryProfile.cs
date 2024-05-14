@@ -9,11 +9,14 @@ public class CategoryProfile : Profile
 {
     public CategoryProfile()
     {
-        ////CreateMap<CreateCategoryViewModel, Category>();
-        ////CreateMap<UpdateCategoryViewModel, Category>();
+        CreateMap<CategoryCreateViewModel, Category>();
+        CreateMap<CategoryUpdateViewModel, Category>().ReverseMap();
 
         CreateMap<Category, CategoryIndexViewModel>();
 
         CreateMap<Category, CategoryDetailsViewModel>();
+
+        CreateMap<Category, CategoryDeleteViewModel>();
+
     }
 }

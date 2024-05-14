@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using MyShop.Domain.Models;
@@ -59,7 +58,7 @@ public class CategoryController : Controller
     }
 
     // GET: CategoryController/Create
-    public ActionResult Create()
+    public IActionResult Create()
     {
         return View();
     }
@@ -67,57 +66,83 @@ public class CategoryController : Controller
     // POST: CategoryController/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Create(IFormCollection collection)
+    public async Task<IActionResult> Create(CategoryCreateViewModel categoryCreateViewModel)
     {
-        try
+        if (!ModelState.IsValid)
         {
-            return RedirectToAction(nameof(Index));
+            return View(categoryCreateViewModel);
         }
-        catch
-        {
-            return View();
-        }
+
+        var category = this.mapper.Map<Category>(categoryCreateViewModel);
+
+        await this.categoryRepository.AddCategory(category);
+
+        return RedirectToAction("Index");
     }
 
     // GET: CategoryController/Edit/5
-    public ActionResult Edit(int id)
+    public async Task<IActionResult> Edit(Guid id)
     {
-        return View();
+        var category = await this.categoryRepository.GetCategory(id);
+        if (category == null)
+        {
+            return View("_NotFound");
+        }
+
+        var categoryUpdateViewModel = this.mapper.Map<CategoryUpdateViewModel>(category);
+        return View(categoryUpdateViewModel);
     }
 
     // POST: CategoryController/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Edit(int id, IFormCollection collection)
+    public async Task<IActionResult> Edit(CategoryUpdateViewModel categoryUpdateViewModel)
     {
-        try
+        if (!ModelState.IsValid)
         {
-            return RedirectToAction(nameof(Index));
+            return View(categoryUpdateViewModel);
         }
-        catch
+
+        var category = await this.categoryRepository.GetCategory(categoryUpdateViewModel.Id);
+        if (category == null)
         {
-            return View();
+            return View("_NotFound");
         }
+
+        category.Name = categoryUpdateViewModel.Name;
+
+        await this.categoryRepository.UpdateCategory(category);
+
+        return RedirectToAction("Index");
     }
 
     // GET: CategoryController/Delete/5
-    public ActionResult Delete(int id)
+    public async Task<IActionResult> DeleteConfirmation(Guid id)
     {
-        return View();
+        var category = await this.categoryRepository.GetCategory(id);
+        if (category == null)
+        {
+            return View("_NotFound");
+        }
+
+        var categoryDeleteViewModel = this.mapper.Map<CategoryDeleteViewModel>(category);
+        return View("Delete", categoryDeleteViewModel);
     }
 
     // POST: CategoryController/Delete/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Delete(int id, IFormCollection collection)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        try
+
+        var category = await this.categoryRepository.GetCategory(id);
+        if (category == null)
         {
-            return RedirectToAction(nameof(Index));
+            return View("_NotFound");
         }
-        catch
-        {
-            return View();
-        }
+
+        await this.categoryRepository.DeleteCategory(category);
+
+        return RedirectToAction("Index");
     }
 }
